@@ -6,7 +6,8 @@ import Form from "react-bootstrap/Form";
 import  Button  from "react-bootstrap/Button";
 import Spinner from "react-bootstrap/Spinner";
 import React, { useState } from "react";
-import { registerUser } from "../services/UserService";
+import { registerUser, loginUser } from "../services/UserService";
+import { useAuthDispatch } from "../context/authContext";
 
 const Register = () => {
 
@@ -16,13 +17,19 @@ const Register = () => {
     const [errors, setErrors] = useState<any>({});
     const [sendingData, setSendingData]= useState(false);
 
+    const authDispatch = useAuthDispatch();
+
     const register = async (e: React.SyntheticEvent) => {
         e.preventDefault();
         try{
             setSendingData(true)
             await registerUser(name,email,password);
-            //redireccionar
-            setSendingData(false)
+            const res = await loginUser(email,password);
+            const token = res.data.token;
+            authDispatch({
+                type:'login',
+                token
+            });
         }catch(errors:any){
             setErrors(errors.response.data.errors);
             setSendingData(false)
